@@ -9,7 +9,10 @@
  *     directly even if we wanted it to.
  */
 export default defineEventHandler(async (event) => {
-  const { apiBase, apiKey } = useRuntimeConfig(event)
+  const config = useRuntimeConfig(event)
+  // Read at request time too: nuxt.config's process.env values are fixed at build time.
+  const apiBase = (process.env.FMEP_API_BASE || config.apiBase).trim()
+  const apiKey = (process.env.FMEP_API_KEY || config.apiKey).trim()
   const path = getRouterParam(event, 'path') ?? ''
   const query = getQuery(event)
   const method = event.node.req.method ?? 'GET'
