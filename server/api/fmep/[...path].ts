@@ -8,6 +8,10 @@
  *   - the backend only listens on localhost, so the browser could not reach it
  *     directly even if we wanted it to.
  */
+// Plain ofetch, not Nitro's $fetch: the target is an external API, and Nitro's
+// route-typed $fetch overflows the type checker on a computed path.
+import { ofetch } from 'ofetch'
+
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   // Read at request time too: nuxt.config's process.env values are fixed at build time.
@@ -19,9 +23,9 @@ export default defineEventHandler(async (event) => {
   const body = ['GET', 'HEAD'].includes(method) ? undefined : await readBody(event).catch(() => undefined)
 
   try {
-    return await $fetch(`/api/v1/${path}`, {
+    return await ofetch(`/api/v1/${path}`, {
       baseURL: apiBase,
-      method: method as any,
+      method,
       query,
       body,
       headers: apiKey ? { 'X-API-Key': apiKey } : {},
